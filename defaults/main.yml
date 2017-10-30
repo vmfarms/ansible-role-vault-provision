@@ -30,6 +30,9 @@ vault_group: vault
 vault_service_enabled: true
 vault_log_dir: /var/log/vault
 
+# Added for backwards compatibility with existing `backends` variable
+secret_backends: '{{ backends }}'
+
 backend_type: file
 
 ### ########################################################### ###
@@ -164,7 +167,7 @@ vault_configuration:
 ### Provision section                                           ###
 ### ########################################################### ###
 
-backends:
+secret_backends:
   - backend_name: secret
     configuration:
       type: generic
@@ -194,6 +197,21 @@ backends:
         data:
           important_data: importantdatavalue
           another_important_data: anotherimportantdatavalue
+
+audit_backends:
+  - backend_name: file
+    configuration:
+      type: file
+      description: File audit backend
+      options:
+        file_path: "{{ vault_log_dir }}/audit.log"
+  - backend_name: syslog
+    configuration:
+      type: syslog
+      description: Syslog audit backend
+      options:
+        facility: AUTH
+        tag: vault
 
 initialization:
   root_token_pgp_key: mQENBFhZFd4BCADGj9gcnJHRwQk1UL8BxTugxmJ6uk82S837LWqzrsDv18zObBQK8bmTFps4x6DrUbLbxzHRB7kxbR5g/KN2qCqMYcYkKgLqMqo9XaS4vCriQKCFaZ3FWG99/TxUurPpy+crVCDun8UMGmWZCvRu7UBJQsAF1htukVhdEXAd1116WRD6W5k/+X6B6FvSAD7ud/PWUENdtLxiRgBVhRCHWPlJvdA7I7EaBjF5TMbwFP4wlSHxbdrWZ0z9wGk5FFbtl1qlNaojyJR1Gs3a7T7lB7y1dr6Y727JAYHP5uzQo06F0nfQm58sXtmeBnyhOHZ04BzXBik+Uoh9Bh1Uj7em0cP5ABEBAAG0T0tyenlzenRvZiBTemV3Y3p5ayAoRW5jcnlwdGlvbiBrZXkgZm9yIEhhc2hpY29ycCBWYXVsdCkgPGsuc3pld2N6eWtAa2Fpbm9zLmNvbT6JAT4EEwECACgFAlhZFd4CGwMFCQHhM4AGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEMOj6FrFv4ik9bsH/3gmLKh8r2xhsbA79bEzBjNPDX9G6qeHfea+RMRjLH5yvNH9/Hnjwkqn3LIAdpzacldrjZMEpqS5z310gxk+cyNB/dFe/Wqmh1UQljDQ354qAZAtQ7OLuypVsg+tI8aIRQieCEC4Ck/h8xnAK8AoOHb29vR+BMNdqp+TNrDrAeYAKchmJiWcYxt5YqT4AP5JRzT82o2Sms3ihyFe1KxgcNbrNjJpEMoCnu8l5e1RrlIeMU8Hm5Mms1ZvausPfFlsa76shhOCZMfZ2acsuuTRqx8ed8UrSmDqAiia60BupsfRfMkqf/GdkEEESoRKhz1EHAUQiC9Flshyl/CjWqCIQCi5AQ0EWFkV3gEIAKLrtH904COoJhOjdqUQNSGu0TSsNik2Hd/v5A5KxG7a2iiqLOD73VvINaTHpwUjkWR3OcgRuqsnshST/qg3T1t8gghON70Pg6nKEPbDGabhA19fQ64woSvY6I2ZTv/XY0CxxDAVNN2O3rpl6ZnUgQBVjd/u4Nx3cydf30MnPtipb9bJ1ISZvWtMAYxAeiqd/6rcj/BXSQBt05ffDwPBd5+7pL7gQrJTa51icggKq06KwTfSdi0cPmqvOenKZB0exrp2jtxw1+QIhlhJJyv33fxaJHZaFqlh7vn6j7e03J4UaVPl5h/fnNg3i1uJJW9E6ECfAwRy394r7V1LUZ/GiEMAEQEAAYkBJQQYAQIADwUCWFkV3gIbDAUJAeEzgAAKCRDDo+haxb+IpJFmB/99Ss1U/dJA/XFwWofj3iEDM3W7OJoahYJLD7eOo3lPT8vNnLEVOPkSPjvaggkSsM3Xp5WZw2/oQ3p5KuIE2bSGK/Ok8zEAjEbn5vT4GNTBSH070OAQEHD5dEcYmh9EKSnitPXlLMOG/szsnReimBjLXRibU2wvuMeY7QO58K9kHm1K9cpNWuU5h8M4CMlBATvfl4ZeIBm6K9gmqKKxkF+7Mw1U8XG/OZv6GQwbMER3h7cdsor9LsOZTIdZW7bj9Iyh42hZHMcWq1E2VvHuklwJdpZfKlUs6b/6WwSPsypLLfHnO6C/G726MXH2JuZe5/fFpn+skxgbYNZ1y1BTnyvs

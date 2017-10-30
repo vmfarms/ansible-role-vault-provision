@@ -21,7 +21,7 @@ Variable part is devided into three sections:
 vault_token: "{{ lookup('env', 'VAULT_TOKEN') }}" # token to provision vault is taken from environment variables, unless you provide vault_token by extra vars or you override this value by your ansible variable
 
 vault_app_mirror: 'https://releases.hashicorp.com' # Package repository
-vault_app_platform: 'linux_amd64' # Which one platform are you interested in 
+vault_app_platform: 'linux_amd64' # Which one platform are you interested in
 vault_app_install_dir: '/opt/vault' # Instalation directory where vault will be installed
 
 vault_app: vault # Vault zip package name
@@ -188,33 +188,46 @@ vault_configuration:
 ### Provision section                                           ###
 ### ########################################################### ###
 
-backends: # Define backends which will be created
-  - backend_name: secret # Backend named secret will be created if doesn't exist
+secret_backends: # Define secret backends which will be created
+  - backend_name: secret # Backend named secret will be created if it doesn't exist
     configuration:
-      type: generic # Type of the backend
+      type: generic # Type of the secrets backend
       description: This backend stores credentials of users # Description
       config:
         max_lease_ttl: 4000 # Max TTL time
-    path: secret # Vault internal path where backend will be mounted 
     secrets: # Set of data container which will be created
       - container_name: authcredentials # Data container named authcredentials
         data: # Comprise all keys and values which will be provisioned into secret/authcredentials
-          username: password 
+          username: password
           david: superstrongpasswordfordavid
           daniel: superstrongpasswordfordaniel
       - container_name: privatekeys # Data container named privatekeys
         data: # Comprise all keys and values which will be provisioned into secret/privatekeys
           key_name: encryptedkey
           key_for_mail: enctryptedkeyformail
-  - backend_name: test # Backend named test will be created if doesn't exist
+  - backend_name: test # Backend named test will be created if it doesn't exist
     configuration:
       type: generic # Type of the backend
-    path: test # Vault internal path where backend will be mounted
     secrets: # Set of data container which will be created
       - container_name: test_container # Data container named test_container
         data: # Comprise all keys and values which will be provisioned into test/test_container
           important_data: importantdatavalue
           another_important_data: anotherimportantdatavalue
+
+audit_backends: # Define audit backends which will be created
+  - backend_name: file # Backend named file will be created if it doesn't exist
+    configuration:
+      type: file # Type of the audit backend
+      description: File audit backend # Description
+      options:
+        file_path: "{{ vault_log_dir }}/audit.log" # System path to write file log to
+  - backend_name: syslog # Backend named syslog will be created if it doesn't exist
+    configuration:
+      type: syslog # Type of the audit backend
+      description: Syslog audit backend # Description
+      options:
+        facility: AUTH
+        tag: vault
 
 initialization: # PGP keys for initialization process
   root_token_pgp_key: mQENBFhZFd4BCADGj9gcnJHRwQk1UL8BxTugxmJ6uk82S837LWqzrsDv18zObBQK8bmTFps4x6DrUbLbxzHRB7kxbR5g/KN2qCqMYcYkKgLqMqo9XaS4vCriQKCFaZ3FWG99/TxUurPpy+crVCDun8UMGmWZCvRu7UBJQsAF1htukVhdEXAd1116WRD6W5k/+X6B6FvSAD7ud/PWUENdtLxiRgBVhRCHWPlJvdA7I7EaBjF5TMbwFP4wlSHxbdrWZ0z9wGk5FFbtl1qlNaojyJR1Gs3a7T7lB7y1dr6Y727JAYHP5uzQo06F0nfQm58sXtmeBnyhOHZ04BzXBik+Uoh9Bh1Uj7em0cP5ABEBAAG0T0tyenlzenRvZiBTemV3Y3p5ayAoRW5jcnlwdGlvbiBrZXkgZm9yIEhhc2hpY29ycCBWYXVsdCkgPGsuc3pld2N6eWtAa2Fpbm9zLmNvbT6JAT4EEwECACgFAlhZFd4CGwMFCQHhM4AGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEMOj6FrFv4ik9bsH/3gmLKh8r2xhsbA79bEzBjNPDX9G6qeHfea+RMRjLH5yvNH9/Hnjwkqn3LIAdpzacldrjZMEpqS5z310gxk+cyNB/dFe/Wqmh1UQljDQ354qAZAtQ7OLuypVsg+tI8aIRQieCEC4Ck/h8xnAK8AoOHb29vR+BMNdqp+TNrDrAeYAKchmJiWcYxt5YqT4AP5JRzT82o2Sms3ihyFe1KxgcNbrNjJpEMoCnu8l5e1RrlIeMU8Hm5Mms1ZvausPfFlsa76shhOCZMfZ2acsuuTRqx8ed8UrSmDqAiia60BupsfRfMkqf/GdkEEESoRKhz1EHAUQiC9Flshyl/CjWqCIQCi5AQ0EWFkV3gEIAKLrtH904COoJhOjdqUQNSGu0TSsNik2Hd/v5A5KxG7a2iiqLOD73VvINaTHpwUjkWR3OcgRuqsnshST/qg3T1t8gghON70Pg6nKEPbDGabhA19fQ64woSvY6I2ZTv/XY0CxxDAVNN2O3rpl6ZnUgQBVjd/u4Nx3cydf30MnPtipb9bJ1ISZvWtMAYxAeiqd/6rcj/BXSQBt05ffDwPBd5+7pL7gQrJTa51icggKq06KwTfSdi0cPmqvOenKZB0exrp2jtxw1+QIhlhJJyv33fxaJHZaFqlh7vn6j7e03J4UaVPl5h/fnNg3i1uJJW9E6ECfAwRy394r7V1LUZ/GiEMAEQEAAYkBJQQYAQIADwUCWFkV3gIbDAUJAeEzgAAKCRDDo+haxb+IpJFmB/99Ss1U/dJA/XFwWofj3iEDM3W7OJoahYJLD7eOo3lPT8vNnLEVOPkSPjvaggkSsM3Xp5WZw2/oQ3p5KuIE2bSGK/Ok8zEAjEbn5vT4GNTBSH070OAQEHD5dEcYmh9EKSnitPXlLMOG/szsnReimBjLXRibU2wvuMeY7QO58K9kHm1K9cpNWuU5h8M4CMlBATvfl4ZeIBm6K9gmqKKxkF+7Mw1U8XG/OZv6GQwbMER3h7cdsor9LsOZTIdZW7bj9Iyh42hZHMcWq1E2VvHuklwJdpZfKlUs6b/6WwSPsypLLfHnO6C/G726MXH2JuZe5/fFpn+skxgbYNZ1y1BTnyvs # Public part of PGP key for vault root token encryption. After initialization process outputted root token is encrypted by this PGP public key
@@ -279,7 +292,7 @@ vault_configuration:
 ```
 You have to also define backends, secrets, policies which you would like to put into Vault and of course you have to define some initialization values like pgp keys for Vault keys encryption, pgp key for Vault root token encryption and secret threshold which define how many keys you/your team have to provide to unseal the Vault. Secret threshold must be less than length of the `pgp_keys` array. Let's adopt below variables as you want.
 
-```backends:
+```secret_backends:
   - backend_name: secret
     configuration:
       type: generic
@@ -340,7 +353,7 @@ tokens:
 
 ## Decrypt Vault keys and root token
 
-During the first cycle of provisioning you get keys and root token: 
+During the first cycle of provisioning you get keys and root token:
 
 ```
 TASK [vault-provision : debug] *************************************************
@@ -427,7 +440,7 @@ Intialization with root token and keys encryption:
 The tests directory contains tests for this role in the form of a Vagrant environment. After executing vagrant up in that directory, you should get an environment with one VM, attached to VirtualBox's default NAT network (Internet access is required to get vault package and dependencies).
 
 
-The directory `tests/roles/vault-provision` is a symbolic link that should point to the root of this project in order to work. 
+The directory `tests/roles/vault-provision` is a symbolic link that should point to the root of this project in order to work.
 
 The playbook `test.yml` applies the role to a VM, setting role variables.
 
@@ -455,7 +468,7 @@ MIT
 
 ## Author Information
 
- 
+
 I attached links where you can find/get more information about me:
 
 - [Linkedin profile](https://pl.linkedin.com/in/krzysztof-szewczyk-8486a2ba)
